@@ -1,10 +1,24 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
+import BottomTabBar from "../components/BottomTabBar";
 
 export default function AppLayout() {
+  const location = useLocation();
+  const showTabBar = ["/home", "/history", "/mypage"].some((p) =>
+    location.pathname.startsWith(p)
+  );
+
+  // 탭바가 있을 때만 하단 패딩을 --tabbar-h 변수로 줘서 이중계산 방지
   return (
-    <div className="min-h-dvh w-full bg-white text-white font-[Pretendard]">
-      {/* Outlet이 화면 전체를 쓰게 하려면 부모가 flex 정렬로 가로를 줄이지 않도록 */}
+    <div className="relative flex flex-col w-full h-full mx-auto bg-white font-[Pretendard]">
       <Outlet />
+      {showTabBar && <BottomTabBar active={getActiveTab(location.pathname)} />}
     </div>
   );
+}
+
+function getActiveTab(pathname: string) {
+  if (pathname.startsWith("/home")) return "home" as const;
+  if (pathname.startsWith("/history")) return "history" as const;
+  if (pathname.startsWith("/mypage")) return "mypage" as const;
+  return "home" as const;
 }
