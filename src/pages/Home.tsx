@@ -1,18 +1,28 @@
 import { useEffect, useState } from "react";
 import { Geolocation } from "@capacitor/geolocation";
 import InputField from "../components/InputField";
-import NaverMap from "../components/NaverMap";
+import KakaoMap from "../components/KakaoMap";
 import { useNavigate } from "react-router-dom";
 import type { RouteItem } from "../types/myRoute";
-import type { ReverseGeocodeResponse, ServiceStatus } from "../types/naver";
 
 type LatLng = { lat: number; lng: number };
 
+// 카카오 coord2RegionCode 결과 타입(필요한 부분만)
+type KakaoRegionResult = {
+  region_type: string;
+  region_1depth_name: string; // 시/도
+  region_2depth_name: string; // 시/군/구
+  region_3depth_name: string;
+  region_4depth_name: string;
+};
+
 // 시/군/구까지만 추출 (없으면 시/도로 대체)
-function formatToSigungu(resp: ReverseGeocodeResponse): string {
-  const first = resp.v2?.results?.[0];
-  const area2 = first?.region?.area2?.name; // 시/군/구
-  const area1 = first?.region?.area1?.name; // 시/도 (fallback)
+function formatToSigunguFromKakao(result: KakaoRegionResult[]): string {
+  const first = result[0];
+  if (!first) return "내 위치";
+
+  const area2 = first.region_2depth_name; // 시/군/구
+  const area1 = first.region_1depth_name; // 시/도 (fallback)
   return area2 || area1 || "내 위치";
 }
 
@@ -43,22 +53,22 @@ export default function Home() {
       const lng = coords.longitude;
       setMyPos({ lat, lng });
 
-      // 역지오코딩 (시/군/구까지만 표기)
-      const svc = window.naver?.maps?.Service;
-      const LatLngCtor = window?.naver?.maps?.LatLng;
+      // 카카오 역지오코딩 (시/군/구까지만 표기)
+      const kakao = window.kakao as any;
+      const maps = kakao?.maps;
+      const services = kakao?.maps?.services;
 
-      if (svc?.reverseGeocode && LatLngCtor) {
-        svc.reverseGeocode(
-          {
-            coords: new LatLngCtor(lat, lng),
-            orders: [svc.OrderType.ROAD_ADDR, svc.OrderType.ADDR].join(","),
-          },
-          (status: ServiceStatus, response: ReverseGeocodeResponse) => {
-            if (status !== svc.Status.OK) {
+      if (maps && services) {
+        const geocoder = new services.Geocoder();
+        geocoder.coord2RegionCode(
+          lng,
+          lat,
+          (result: KakaoRegionResult[], status: string) => {
+            if (status !== services.Status.OK) {
               setAddress("내 위치");
               return;
             }
-            setAddress(formatToSigungu(response));
+            setAddress(formatToSigunguFromKakao(result));
           }
         );
       } else {
@@ -91,7 +101,7 @@ export default function Home() {
       to: destination,
       date,
       time,
-      status: "CREATED",
+      status: "APPROVED",
     };
     navigate("/history", { state: { newRoute } });
   };
@@ -120,7 +130,7 @@ export default function Home() {
 
             {/* 지도 영역 */}
             <main className="relative">
-              <NaverMap
+              <KakaoMap
                 className="w-full h-[280px] bg-gray-200"
                 center={myPos ?? undefined}
                 onSelectPoint={handleMapSelect}
