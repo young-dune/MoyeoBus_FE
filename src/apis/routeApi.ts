@@ -4,8 +4,8 @@ import type { RouteStatus } from "../types/myRoute";
 // 공용 타입
 export type RouteApiItem = {
   id: number;
-  departureId: number;
-  destinationId: number;
+  departureNm: string;
+  destinationNm: string;
   startDateTime: string; // "2025-10-17T10:00:00"
   endDateTime: string;
   status: RouteStatus; // "APPROVED" | "CANCELLED" | "PENDING"
@@ -33,6 +33,7 @@ export const fetchRoutes = async (params: {
   cursor?: number;
 }) => {
   const res = await axiosInstance.get<RoutesApiResponse>("/routes", { params });
+  console.log(res.data);
   return res.data;
 };
 
