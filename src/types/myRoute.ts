@@ -2,6 +2,7 @@ export type RouteStatus = "APPROVED" | "CANCELLED" | "PENDING";
 
 export interface RouteItem {
   id: string;
+  busNumber?: number;
   from: string;
   to: string;
   date: string; // YYYY-MM-DD
