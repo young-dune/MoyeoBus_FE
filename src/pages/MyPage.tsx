@@ -12,7 +12,7 @@ export default function MyPage() {
 
   return (
     <PageLayout showBack={false} showBell={false}>
-      <div className="mt-10">
+      <div className="mt-[50px]">
         {/* 페이지 타이틀 */}
         <h1 className="text-[#212529] text-[18px] leading-[150%] font-[700]">
           마이페이지
