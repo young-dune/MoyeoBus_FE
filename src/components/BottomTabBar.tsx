@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 import type { ReactNode } from "react";
 import { HomeIcon, HistoryIcon, MyPageIcon } from "../assets/icons";
 
-type Tab = "home" | "history" | "mypage";
+type Tab = "home" | "myroute" | "mypage" | "history";
 
 interface Props {
   active: Tab;
@@ -16,21 +16,24 @@ export default function BottomTabBar({ active }: Props) {
       className="
         fixed bottom-0 left-0 right-0 mx-auto w-full max-w-sm
         bg-white font-[Pretendard]
+        pb-[max(24px,var(--safe-bottom))]
       "
       style={
         {
-          "--tabbar-h": `calc(66px + var(--safe-bottom))`,
+          "--tabbar-h": `calc(66px + max(24px,var(--safe-bottom)))`,
         } as React.CSSProperties
       }
     >
+      {/* 위쪽 border */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gray-200" />
 
+      {/* 탭 아이템 영역 */}
       <div className="flex h-[66px]">
         {item("home", "홈", "/home", active, <HomeIcon size={20} />)}
         {item(
-          "history",
+          "myroute",
           "요청내역",
-          "/history",
+          "/myroute",
           active,
           <HistoryIcon size={20} />
         )}
@@ -42,9 +45,6 @@ export default function BottomTabBar({ active }: Props) {
           <MyPageIcon size={20} />
         )}
       </div>
-
-      {/* 제스처 바 대응 */}
-      <div className="h-[var(--safe-bottom)]" />
     </nav>
   );
 }
