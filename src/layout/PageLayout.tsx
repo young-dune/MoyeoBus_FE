@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 type PageLayoutProps = {
   children: ReactNode;
   onBackClick?: () => void;
+  showBack?: boolean;
   showBell?: boolean;
   title?: string;
 };
@@ -13,6 +14,7 @@ type PageLayoutProps = {
 export default function PageLayout({
   children,
   onBackClick,
+  showBack = true,
   showBell = true,
   title,
 }: PageLayoutProps) {
@@ -26,22 +28,34 @@ export default function PageLayout({
     navigate(-1);
   };
 
+  const goToNotification = () => {
+    navigate("/notification");
+  };
+
   return (
     <div className="flex flex-col items-center w-full h-full">
-      <div className="w-full max-w-sm pt-8 pb-[70px] px-5">
+      <div className="w-full max-w-sm pt-8 pb-[94px] px-5">
         <header className="flex items-center justify-between mb-4 mt-5">
-          <button onClick={handleBack}>
-            <img src={back} alt="back" />
-          </button>
+          {showBack ? (
+            <button onClick={handleBack}>
+              <img src={back} alt="back" />
+            </button>
+          ) : (
+            <div />
+          )}
+
           {title ? (
             <h1 className="text-[18px] font-[600]">{title}</h1>
           ) : (
             <div />
           )}
-          {showBell && (
+
+          {showBell ? (
             <button>
-              <img src={bell} alt="bell" />
+              <img src={bell} alt="bell" onClick={goToNotification} />
             </button>
+          ) : (
+            <div />
           )}
         </header>
 
