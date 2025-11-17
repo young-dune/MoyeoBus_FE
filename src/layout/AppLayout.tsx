@@ -3,7 +3,7 @@ import BottomTabBar from "../components/BottomTabBar";
 
 export default function AppLayout() {
   const location = useLocation();
-  const showTabBar = ["/home", "/history", "/mypage"].some((p) =>
+  const showTabBar = ["/home", "/myroute", "/mypage", "/history"].some((p) =>
     location.pathname.startsWith(p)
   );
 
@@ -18,7 +18,8 @@ export default function AppLayout() {
 
 function getActiveTab(pathname: string) {
   if (pathname.startsWith("/home")) return "home" as const;
-  if (pathname.startsWith("/history")) return "history" as const;
+  if (pathname.startsWith("/myroute")) return "myroute" as const;
   if (pathname.startsWith("/mypage")) return "mypage" as const;
+  if (pathname.startsWith("/history")) return "history" as const;
   return "home" as const;
 }
