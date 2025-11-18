@@ -16,11 +16,11 @@ export default function BottomTabBar({ active }: Props) {
       className="
         fixed bottom-0 left-0 right-0 mx-auto w-full max-w-sm
         bg-white font-[Pretendard]
-        pb-[max(24px,var(--safe-bottom))] z-10
+        pb-[max(0px,var(--safe-bottom))] z-10
       "
       style={
         {
-          "--tabbar-h": `calc(66px + max(24px,var(--safe-bottom)))`,
+          "--tabbar-h": `calc(66px + max(0px,var(--safe-bottom)))`,
         } as React.CSSProperties
       }
     >
@@ -28,7 +28,7 @@ export default function BottomTabBar({ active }: Props) {
       <div className="absolute top-0 left-0 right-0 h-px bg-gray-200" />
 
       {/* 탭 아이템 영역 */}
-      <div className="flex h-[66px]">
+      <div className="flex h-full">
         {item("home", "홈", "/home", active, <HomeIcon size={20} />)}
         {item(
           "myroute",
@@ -64,14 +64,14 @@ function item(
       aria-current={isActive ? "page" : undefined}
       className={`
         flex flex-col items-center justify-center gap-1 flex-1
-        text-[12px]
+        text-[12px] py-2
         ${isActive ? "text-[#212529]" : "text-[#ADB5BD]"}
       `}
     >
       <span aria-hidden className="inline-flex">
         {icon}
       </span>
-      <span>{label}</span>
+      <span className="text-[12px]">{label}</span>
     </NavLink>
   );
 }
