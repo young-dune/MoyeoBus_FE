@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import type { RouteItem } from "../types/myRoute";
 import LocationIcon from "../assets/icons/LocationIcon";
 import MapCenterIcon from "../assets/icons/MapCenterIcon";
+import bell from "../assets/bell.svg";
 
 type LatLng = { lat: number; lng: number };
 
@@ -105,7 +106,7 @@ export default function Home() {
     <div className="w-full h-full flex flex-col font-[Pretendard] bg-white">
       {/* 내부 스크롤 영역 (전체 콘텐츠) */}
       <div className="flex-1 overflow-y-auto">
-        <div className="w-full max-w-sm mx-auto pt-4 pb-[calc(94px+var(--safe-bottom))]">
+        <div className="w-full max-w-sm mx-auto pt-4 pb-[calc(70px+var(--safe-bottom))]">
           <div className="overflow-hidden text-[#111827]">
             {/* 인사말 + 버튼 */}
             <div className="flex items-end justify-between pt-5 pb-3 px-4">
@@ -114,14 +115,19 @@ export default function Home() {
                 <br />
                 이동을 시작해볼까요?
               </p>
-              <button
-                type="button"
-                onClick={() => navigate("/history")}
-                className="flex items-center h-7 pl-2 pr-3 text-[12px] leading-[150%] text-[#007CFF] font-normal rounded-[5px] border border-[#007CFF] bg-[#fff]"
-              >
-                <LocationIcon className="mr-1 w-[15px] h-[15px]" />
-                생성된 노선
-              </button>
+              <div className="flex flex-col items-end gap-3">
+                <button type="button" onClick={() => navigate("/notification")}>
+                  <img src={bell} alt="bell" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate("/history")}
+                  className="flex items-center h-7 pl-2 pr-3 text-[12px] leading-[150%] text-[#007CFF] font-normal rounded-[5px] border border-[#007CFF] bg-[#fff]"
+                >
+                  <LocationIcon className="mr-1 w-[15px] h-[15px]" />
+                  생성된 노선
+                </button>
+              </div>
             </div>
 
             {/* 지도 영역 */}
@@ -139,7 +145,7 @@ export default function Home() {
                 </div>
               )}
 
-              {/* 🆕 지도 우측 하단 '내 위치' 버튼 */}
+              {/* 지도 우측 하단 '내 위치' 버튼 */}
               <button
                 type="button"
                 onClick={fetchMyLocation}
