@@ -34,8 +34,8 @@ export default function PageLayout({
 
   return (
     <div className="flex flex-col items-center w-full h-full">
-      <div className="w-full max-w-sm pt-8 pb-[94px] px-5">
-        <header className="flex items-center justify-between mb-4 mt-5">
+      <div className="w-full max-w-sm pt-8 pb-[70px] px-5">
+        <header className="flex items-center justify-between mb-4">
           {showBack ? (
             <button onClick={handleBack}>
               <img src={back} alt="back" />

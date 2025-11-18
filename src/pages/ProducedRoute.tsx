@@ -212,7 +212,7 @@ export default function ProducedRoute() {
         </p>
       )}
 
-      <div className="flex flex-col gap-3 pt-3">
+      <div className="flex flex-col gap-3 py-3">
         {routeList.map((route) => (
           <RouteCard key={route.id} route={route} onClick={handleDetail} />
         ))}
