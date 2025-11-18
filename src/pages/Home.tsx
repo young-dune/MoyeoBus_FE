@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { Geolocation } from "@capacitor/geolocation";
-import InputField from "../components/InputField";
-import KakaoMap from "../components/KakaoMap";
 import { useNavigate } from "react-router-dom";
 import type { RouteItem } from "../types/myRoute";
-import LocationIcon from "../assets/icons/LocationIcon";
-import MapCenterIcon from "../assets/icons/MapCenterIcon";
-import bell from "../assets/bell.svg";
+import { fetchAddresses, type AddressItem } from "../apis/routeApi";
+import HomeHeader from "../components/home/HomeHeader";
+import HomeMapSection from "../components/home/HomeMapSection";
+import HomeRequestForm from "../components/home/HomeRequestForm";
 
 type LatLng = { lat: number; lng: number };
 
@@ -38,6 +37,10 @@ export default function Home() {
   const [loadingPos, setLoadingPos] = useState(false);
   const [posError, setPosError] = useState<string | null>(null);
   const [address, setAddress] = useState("모여버스");
+  const [stops, setStops] = useState<AddressItem[]>([]);
+  const [loadingStops, setLoadingStops] = useState(false);
+  const [stopError, setStopError] = useState<string | null>(null);
+
   const navigate = useNavigate();
 
   const fetchMyLocation = async () => {
@@ -63,15 +66,52 @@ export default function Home() {
 
       if (maps && services) {
         const geocoder = new services.Geocoder();
-        geocoder.coord2RegionCode(lng, lat, (result, status) => {
-          if (status !== services.Status.OK) {
-            setAddress("내 위치");
-            return;
-          }
+        geocoder.coord2RegionCode(
+          lng,
+          lat,
+          async (result: any, status: any) => {
+            if (status !== services.Status.OK) {
+              setAddress("내 위치");
+              return;
+            }
 
-          const typedResult = result as KakaoRegionResult[];
-          setAddress(formatToSigunguFromKakao(typedResult));
-        });
+            const typedResult = result as KakaoRegionResult[];
+            const first = typedResult[0];
+            if (!first) {
+              setAddress("내 위치");
+              return;
+            }
+
+            const area1 = first.region_1depth_name; // 시/도
+            const area2 = first.region_2depth_name; // 시/군/구
+            console.log("현재 좌표:", lat, lng);
+            console.log("카카오 역지오코딩 결과:", first);
+            console.log("시/도(dosi):", area1);
+            console.log("시/군/구(sigungu):", area2);
+
+            setAddress(formatToSigunguFromKakao(typedResult));
+
+            // 현재 행정구역에 포함된 정류장 목록 조회
+            if (area1 && area2) {
+              try {
+                setLoadingStops(true);
+                setStopError(null);
+                const list = await fetchAddresses(area1, area2);
+                console.log("불러온 정류장 목록:", list);
+                console.log("정류장 개수:", list.length);
+                setStops(list);
+              } catch (err) {
+                const msg =
+                  err instanceof Error
+                    ? err.message
+                    : "정류장 목록을 불러오지 못했습니다.";
+                setStopError(msg);
+              } finally {
+                setLoadingStops(false);
+              }
+            }
+          }
+        );
       } else {
         setAddress("내 위치");
       }
@@ -108,110 +148,36 @@ export default function Home() {
       <div className="flex-1 overflow-y-auto">
         <div className="w-full max-w-sm mx-auto pt-4 pb-[calc(70px+var(--safe-bottom))]">
           <div className="overflow-hidden text-[#111827]">
-            {/* 인사말 + 버튼 */}
-            <div className="flex items-end justify-between pt-5 pb-3 px-4">
-              <p className="text-[18px] leading-[150%] font-[500] text-[#212529]">
-                안녕하세요, <span className="font-[700]">{address}</span>에서
-                <br />
-                이동을 시작해볼까요?
-              </p>
-              <div className="flex flex-col items-end gap-3">
-                <button type="button" onClick={() => navigate("/notification")}>
-                  <img src={bell} alt="bell" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => navigate("/history")}
-                  className="flex items-center h-7 pl-2 pr-3 text-[12px] leading-[150%] text-[#007CFF] font-normal rounded-[5px] border border-[#007CFF] bg-[#fff]"
-                >
-                  <LocationIcon className="mr-1 w-[15px] h-[15px]" />
-                  생성된 노선
-                </button>
-              </div>
-            </div>
+            {/* 상단 인사 + 버튼들 */}
+            <HomeHeader
+              address={address}
+              onClickNotification={() => navigate("/notification")}
+              onClickHistory={() => navigate("/history")}
+            />
 
             {/* 지도 영역 */}
-            <main className="relative">
-              <KakaoMap
-                className="w-full h-[280px] bg-gray-200"
-                center={myPos ?? undefined}
-                zoomLevel={4}
-                // onSelectPoint={handleMapSelect}
-              />
+            <HomeMapSection
+              myPos={myPos}
+              loadingPos={loadingPos}
+              posError={posError}
+              onClickMyLocation={fetchMyLocation}
+            />
 
-              {posError && (
-                <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-white/90 text-xs px-3 py-1 rounded shadow">
-                  {posError}
-                </div>
-              )}
-
-              {/* 지도 우측 하단 '내 위치' 버튼 */}
-              <button
-                type="button"
-                onClick={fetchMyLocation}
-                disabled={loadingPos}
-                className={`absolute bottom-3 right-3 w-10 h-10 rounded-full border shadow flex items-center justify-center z-10 transition
-    ${
-      loadingPos
-        ? "bg-[#E7F1FF] cursor-default"
-        : "bg-white border-gray-200 active:scale-95"
-    }`}
-                aria-label="내 위치로 이동"
-              >
-                {/* 로딩 중일 때 바깥에 퍼지는 원 */}
-                {loadingPos && (
-                  <span className="absolute inline-flex h-9 w-9 rounded-full bg-[#007CFF]/30 animate-ping" />
-                )}
-
-                {/* 실제 아이콘 */}
-                <MapCenterIcon
-                  className={`w-[18px] h-[18px] relative
-      ${loadingPos ? "text-[#007CFF]" : "text-[#ADB5BD]"}`}
-                />
-              </button>
-            </main>
-
-            {/* 폼 영역 */}
-            <div className="px-4 py-4">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <InputField
-                    variant="date"
-                    placeholder="날짜 입력"
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                  />
-                  <InputField
-                    variant="origin"
-                    placeholder="출발지 입력"
-                    value={origin}
-                    onChange={(e) => setOrigin(e.target.value)}
-                  />
-                  <InputField
-                    variant="destination"
-                    placeholder="도착지 입력"
-                    value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
-                  />
-                  <InputField
-                    variant="time"
-                    placeholder="희망 출발 시간"
-                    type="time"
-                    value={time}
-                    onChange={(e) => setTime(e.target.value)}
-                  />
-                </div>
-
-                {/* 버튼이 화면 밖으로 안 짤리도록 여유 padding */}
-                <button
-                  type="submit"
-                  className="w-full h-12 rounded-[10px] bg-[#007CFF] leading-[150%] text-white text-[14px] font-[500] active:scale-[0.99] transition"
-                >
-                  노선 요청하기
-                </button>
-              </form>
-            </div>
+            {/* 폼 + 자동완성 */}
+            <HomeRequestForm
+              date={date}
+              origin={origin}
+              destination={destination}
+              time={time}
+              onChangeDate={setDate}
+              onChangeOrigin={setOrigin}
+              onChangeDestination={setDestination}
+              onChangeTime={setTime}
+              onSubmit={handleSubmit}
+              stops={stops}
+              loadingStops={loadingStops}
+              stopError={stopError}
+            />
           </div>
         </div>
       </div>
