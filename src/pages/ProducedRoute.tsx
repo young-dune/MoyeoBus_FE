@@ -123,9 +123,10 @@ export default function ProducedRoute() {
         const { from, to } = getDateRangeByPeriod(period);
 
         const data = await fetchRoutes({
+          status: "APPROVED",
           from,
           to,
-          cursor: 1,
+          cursor: undefined,
         });
 
         const apiItems = data.result.items ?? [];

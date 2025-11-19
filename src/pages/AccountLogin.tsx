@@ -30,7 +30,7 @@ export default function AccountLogin() {
     }
 
     if (!hasError) {
-      alert(`로그인 시도\nid: ${userId}\nremember: ${remember ? "Y" : "N"}`);
+      console.log("로그인 성공");
     }
   };
 
@@ -57,7 +57,7 @@ export default function AccountLogin() {
         {/* 로그인 폼 */}
         <form
           onSubmit={onSubmit}
-          className="row-start-3 space-y-2 flex flex-col w-full pt-12 pb-10"
+          className="row-start-3 space-y-3 flex flex-col w-full pt-12 pb-10"
         >
           {/* 아이디 */}
           <div>
