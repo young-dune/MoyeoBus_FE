@@ -126,7 +126,7 @@ export default function ProducedRoute() {
           status: "APPROVED",
           from,
           to,
-          cursor: 1,
+          cursor: undefined,
         });
 
         const apiItems = data.result.items ?? [];
