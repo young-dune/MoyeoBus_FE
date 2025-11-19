@@ -71,52 +71,48 @@ export default function Home() {
 
       if (maps && services) {
         const geocoder = new services.Geocoder();
-        geocoder.coord2RegionCode(
-          lng,
-          lat,
-          async (result: any, status: any) => {
-            if (status !== services.Status.OK) {
-              setAddress("내 위치");
-              return;
-            }
+        geocoder.coord2RegionCode(lng, lat, async (result, status) => {
+          if (status !== services.Status.OK) {
+            setAddress("내 위치");
+            return;
+          }
 
-            const typedResult = result as KakaoRegionResult[];
-            const first = typedResult[0];
-            if (!first) {
-              setAddress("내 위치");
-              return;
-            }
+          const typedResult = result as KakaoRegionResult[];
+          const first = typedResult[0];
+          if (!first) {
+            setAddress("내 위치");
+            return;
+          }
 
-            const area1 = first.region_1depth_name; // 시/도
-            const area2 = first.region_2depth_name; // 시/군/구
-            console.log("현재 좌표:", lat, lng);
-            console.log("카카오 역지오코딩 결과:", first);
-            console.log("시/도(dosi):", area1);
-            console.log("시/군/구(sigungu):", area2);
+          const area1 = first.region_1depth_name; // 시/도
+          const area2 = first.region_2depth_name; // 시/군/구
+          console.log("현재 좌표:", lat, lng);
+          console.log("카카오 역지오코딩 결과:", first);
+          console.log("시/도(dosi):", area1);
+          console.log("시/군/구(sigungu):", area2);
 
-            setAddress(formatToSigunguFromKakao(typedResult));
+          setAddress(formatToSigunguFromKakao(typedResult));
 
-            // 현재 행정구역에 포함된 정류장 목록 조회
-            if (area1 && area2) {
-              try {
-                setLoadingStops(true);
-                setStopError(null);
-                const list = await fetchAddresses(area1, area2);
-                console.log("불러온 정류장 목록:", list);
-                console.log("정류장 개수:", list.length);
-                setStops(list);
-              } catch (err) {
-                const msg =
-                  err instanceof Error
-                    ? err.message
-                    : "정류장 목록을 불러오지 못했습니다.";
-                setStopError(msg);
-              } finally {
-                setLoadingStops(false);
-              }
+          // 현재 행정구역에 포함된 정류장 목록 조회
+          if (area1 && area2) {
+            try {
+              setLoadingStops(true);
+              setStopError(null);
+              const list = await fetchAddresses(area1, area2);
+              console.log("불러온 정류장 목록:", list);
+              console.log("정류장 개수:", list.length);
+              setStops(list);
+            } catch (err) {
+              const msg =
+                err instanceof Error
+                  ? err.message
+                  : "정류장 목록을 불러오지 못했습니다.";
+              setStopError(msg);
+            } finally {
+              setLoadingStops(false);
             }
           }
-        );
+        });
       } else {
         setAddress("내 위치");
       }
