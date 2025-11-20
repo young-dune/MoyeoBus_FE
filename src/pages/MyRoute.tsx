@@ -153,7 +153,7 @@ export default function MyRoute() {
         {routeList.map((route) => (
           <div
             key={route.id}
-            className="bg-white rounded-xl border border-gray-200 p-4"
+            className="bg-white rounded-xl border border-gray-200 py-4 px-6"
           >
             <div className="mb-2">
               <span
