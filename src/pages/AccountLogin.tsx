@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import loginLogo from "../assets/loginLogo.svg";
 import back from "../assets/back.svg";
+import { login } from "../apis/authApi";
 
 export default function AccountLogin() {
   const navigate = useNavigate();
@@ -12,16 +13,18 @@ export default function AccountLogin() {
   const [pwError, setPwError] = useState<string | null>(null);
   const [remember, setRemember] = useState(false);
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     let hasError = false;
+
     if (!userId) {
       setIdError("아이디가 존재하지 않습니다.");
       hasError = true;
     } else {
       setIdError(null);
     }
+
     if (!password) {
       setPwError("비밀번호를 확인해주세요.");
       hasError = true;
@@ -29,8 +32,19 @@ export default function AccountLogin() {
       setPwError(null);
     }
 
-    if (!hasError) {
+    if (hasError) return;
+
+    try {
+      await login({
+        email: userId,
+        password,
+      });
+
       console.log("로그인 성공");
+      navigate("/home");
+    } catch (err) {
+      console.error(err);
+      setPwError("아이디 또는 비밀번호가 올바르지 않습니다.");
     }
   };
 
@@ -124,9 +138,6 @@ export default function AccountLogin() {
           {/* 로그인 버튼 */}
           <button
             type="submit"
-            onClick={() => {
-              navigate("/home");
-            }}
             className="w-full h-12 rounded-[10px] bg-[#1976F4] text-white text-[14px] font-medium"
           >
             로그인
