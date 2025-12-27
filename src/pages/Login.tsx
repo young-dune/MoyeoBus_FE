@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import loginLogo from "../assets/loginLogo.svg";
 import google from "../assets/google.svg";
 import kakao from "../assets/kakao.svg";
+import { loginOAuth } from "../apis/authApi";
 
 type Provider = "local" | "kakao" | "google";
 
@@ -14,8 +15,8 @@ export default function Login() {
       navigate("/login/account");
       return;
     }
+    loginOAuth(provider);
   };
-
   return (
     <div className="min-h-screen bg-[#fff]">
       {/* 상단 120px / 히어로(로고+카피) / 액션(버튼) */}
